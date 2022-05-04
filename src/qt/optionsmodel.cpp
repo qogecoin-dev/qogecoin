@@ -1,14 +1,14 @@
-// Copyright (c) 2011-2021 The Bitcoin Core developers
+// Copyright (c) 2011-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include <config/bitcoin-config.h>
+#include <config/qogecoin-config.h>
 #endif
 
 #include <qt/optionsmodel.h>
 
-#include <qt/bitcoinunits.h>
+#include <qt/qogecoinunits.h>
 #include <qt/guiconstants.h>
 #include <qt/guiutil.h>
 
@@ -72,15 +72,15 @@ void OptionsModel::Init(bool resetSettings)
     fMinimizeOnClose = settings.value("fMinimizeOnClose").toBool();
 
     // Display
-    if (!settings.contains("DisplayBitcoinUnit")) {
-        settings.setValue("DisplayBitcoinUnit", QVariant::fromValue(BitcoinUnit::BTC));
+    if (!settings.contains("DisplayQogecoinUnit")) {
+        settings.setValue("DisplayQogecoinUnit", QVariant::fromValue(QogecoinUnit::Qoge));
     }
-    QVariant unit = settings.value("DisplayBitcoinUnit");
-    if (unit.canConvert<BitcoinUnit>()) {
-        m_display_bitcoin_unit = unit.value<BitcoinUnit>();
+    QVariant unit = settings.value("DisplayQogecoinUnit");
+    if (unit.canConvert<QogecoinUnit>()) {
+        m_display_qogecoin_unit = unit.value<QogecoinUnit>();
     } else {
-        m_display_bitcoin_unit = BitcoinUnit::BTC;
-        settings.setValue("DisplayBitcoinUnit", QVariant::fromValue(m_display_bitcoin_unit));
+        m_display_qogecoin_unit = QogecoinUnit::Qoge;
+        settings.setValue("DisplayQogecoinUnit", QVariant::fromValue(m_display_qogecoin_unit));
     }
 
     if (!settings.contains("strThirdPartyTxUrls"))
@@ -171,7 +171,7 @@ void OptionsModel::Init(bool resetSettings)
         // The call order is:
         //
         // InitParameterInteraction()
-        //     would set -listenonion=0 if it sees -listen=0, but for bitcoin-qt with
+        //     would set -listenonion=0 if it sees -listen=0, but for qogecoin-qt with
         //     fListen=false -listen is 1 at this point
         //
         // OptionsModel::Init()
@@ -384,7 +384,7 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return m_sub_fee_from_amount;
 #endif
         case DisplayUnit:
-            return QVariant::fromValue(m_display_bitcoin_unit);
+            return QVariant::fromValue(m_display_qogecoin_unit);
         case ThirdPartyTxUrls:
             return strThirdPartyTxUrls;
         case Language:
@@ -393,7 +393,7 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return m_use_embedded_monospaced_font;
         case CoinControlFeatures:
             return fCoinControlFeatures;
-        case EnablePSBTControls:
+        case EnablePSQogeontrols:
             return settings.value("enable_psbt_controls");
         case Prune:
             return settings.value("bPrune");
@@ -542,7 +542,7 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             settings.setValue("fCoinControlFeatures", fCoinControlFeatures);
             Q_EMIT coinControlFeaturesChanged(fCoinControlFeatures);
             break;
-        case EnablePSBTControls:
+        case EnablePSQogeontrols:
             m_enable_psbt_controls = value.toBool();
             settings.setValue("enable_psbt_controls", m_enable_psbt_controls);
             break;
@@ -594,11 +594,11 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
 
 void OptionsModel::setDisplayUnit(const QVariant& new_unit)
 {
-    if (new_unit.isNull() || new_unit.value<BitcoinUnit>() == m_display_bitcoin_unit) return;
-    m_display_bitcoin_unit = new_unit.value<BitcoinUnit>();
+    if (new_unit.isNull() || new_unit.value<QogecoinUnit>() == m_display_qogecoin_unit) return;
+    m_display_qogecoin_unit = new_unit.value<QogecoinUnit>();
     QSettings settings;
-    settings.setValue("DisplayBitcoinUnit", QVariant::fromValue(m_display_bitcoin_unit));
-    Q_EMIT displayUnitChanged(m_display_bitcoin_unit);
+    settings.setValue("DisplayQogecoinUnit", QVariant::fromValue(m_display_qogecoin_unit));
+    Q_EMIT displayUnitChanged(m_display_qogecoin_unit);
 }
 
 void OptionsModel::setRestartRequired(bool fRequired)
@@ -623,7 +623,7 @@ void OptionsModel::checkAndMigrate()
     if (settingsVersion < CLIENT_VERSION)
     {
         // -dbcache was bumped from 100 to 300 in 0.13
-        // see https://github.com/bitcoin/bitcoin/pull/8273
+        // see https://github.com/qogecoin/qogecoin/pull/8273
         // force people to upgrade to the new value if they are using 100MB
         if (settingsVersion < 130000 && settings.contains("nDatabaseCache") && settings.value("nDatabaseCache").toLongLong() == 100)
             settings.setValue("nDatabaseCache", (qint64)nDefaultDbCache);

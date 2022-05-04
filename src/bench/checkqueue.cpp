@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2020 The Bitcoin Core developers
+// Copyright (c) 2015-2020 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -39,10 +39,7 @@ static void CCheckQueueSpeedPrevectorJob(benchmark::Bench& bench)
         {
             return true;
         }
-        void swap(PrevectorJob& x) noexcept
-        {
-            p.swap(x.p);
-        };
+        void swap(PrevectorJob& x){p.swap(x.p);};
     };
     CCheckQueue<PrevectorJob> queue {QUEUE_BATCH_SIZE};
     // The main thread should be counted to prevent thread oversubscription, and

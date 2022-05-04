@@ -1,4 +1,4 @@
-// Copyright (c) 2021 The Bitcoin Core developers
+// Copyright (c) 2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -64,7 +64,7 @@ struct FuzzedWallet {
         assert(RemoveWallet(context, wallet, load_on_start, warnings));
         assert(warnings.empty());
         UnloadWallet(std::move(wallet));
-        fs::remove_all(GetWalletDir() / fs::PathFromString(name));
+        fs::remove_all(GetWalletDir() / name);
     }
     CScript GetScriptPubKey(FuzzedDataProvider& fuzzed_data_provider)
     {

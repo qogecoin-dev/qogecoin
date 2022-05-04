@@ -1,9 +1,9 @@
-// Copyright (c) 2016-2021 The Bitcoin Core developers
+// Copyright (c) 2016-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_POLICY_RBF_H
-#define BITCOIN_POLICY_RBF_H
+#ifndef QOGECOIN_POLICY_RBF_H
+#define QOGECOIN_POLICY_RBF_H
 
 #include <primitives/transaction.h>
 #include <txmempool.h>
@@ -99,4 +99,4 @@ std::optional<std::string> PaysForRBF(CAmount original_fees,
                                       CFeeRate relay_fee,
                                       const uint256& txid);
 
-#endif // BITCOIN_POLICY_RBF_H
+#endif // QOGECOIN_POLICY_RBF_H

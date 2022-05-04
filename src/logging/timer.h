@@ -1,10 +1,10 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2021 The Bitcoin Core developers
+// Copyright (c) 2009-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_LOGGING_TIMER_H
-#define BITCOIN_LOGGING_TIMER_H
+#ifndef QOGECOIN_LOGGING_TIMER_H
+#define QOGECOIN_LOGGING_TIMER_H
 
 #include <logging.h>
 #include <util/macros.h>
@@ -106,4 +106,4 @@ private:
     BCLog::Timer<std::chrono::seconds> UNIQUE_NAME(logging_timer)(__func__, end_msg)
 
 
-#endif // BITCOIN_LOGGING_TIMER_H
+#endif // QOGECOIN_LOGGING_TIMER_H

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2020 The Bitcoin Core developers
+// Copyright (c) 2015-2020 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -165,8 +165,7 @@ public:
         test();
     }
 
-    void swap() noexcept
-    {
+    void swap() {
         real_vector.swap(real_vector_alt);
         pre_vector.swap(pre_vector_alt);
         test();

@@ -1,5 +1,5 @@
 // Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2021 The Bitcoin Core developers
+// Copyright (c) 2009-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,6 +17,7 @@
 #include <net.h>
 #include <node/context.h>
 #include <node/miner.h>
+#include <policy/fees.h>
 #include <pow.h>
 #include <rpc/blockchain.h>
 #include <rpc/mining.h>
@@ -29,6 +30,7 @@
 #include <shutdown.h>
 #include <txmempool.h>
 #include <univalue.h>
+#include <util/fees.h>
 #include <util/strencodings.h>
 #include <util/string.h>
 #include <util/system.h>
@@ -204,7 +206,7 @@ static RPCHelpMan generatetodescriptor()
         "Mine to a specified descriptor and return the block hashes.",
         {
             {"num_blocks", RPCArg::Type::NUM, RPCArg::Optional::NO, "How many blocks are generated."},
-            {"descriptor", RPCArg::Type::STR, RPCArg::Optional::NO, "The descriptor to send the newly generated bitcoin to."},
+            {"descriptor", RPCArg::Type::STR, RPCArg::Optional::NO, "The descriptor to send the newly generated qogecoin to."},
             {"maxtries", RPCArg::Type::NUM, RPCArg::Default{DEFAULT_MAX_TRIES}, "How many iterations to try."},
         },
         RPCResult{
@@ -248,7 +250,7 @@ static RPCHelpMan generatetoaddress()
         "Mine to a specified address and return the block hashes.",
          {
              {"nblocks", RPCArg::Type::NUM, RPCArg::Optional::NO, "How many blocks are generated."},
-             {"address", RPCArg::Type::STR, RPCArg::Optional::NO, "The address to send the newly generated bitcoin to."},
+             {"address", RPCArg::Type::STR, RPCArg::Optional::NO, "The address to send the newly generated qogecoin to."},
              {"maxtries", RPCArg::Type::NUM, RPCArg::Default{DEFAULT_MAX_TRIES}, "How many iterations to try."},
          },
          RPCResult{
@@ -259,7 +261,7 @@ static RPCHelpMan generatetoaddress()
          RPCExamples{
             "\nGenerate 11 blocks to myaddress\n"
             + HelpExampleCli("generatetoaddress", "11 \"myaddress\"")
-            + "If you are using the " PACKAGE_NAME " wallet, you can get a new address to send the newly generated bitcoin to with:\n"
+            + "If you are using the " PACKAGE_NAME " wallet, you can get a new address to send the newly generated qogecoin to with:\n"
             + HelpExampleCli("getnewaddress", "")
                 },
         [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
@@ -288,7 +290,7 @@ static RPCHelpMan generateblock()
     return RPCHelpMan{"generateblock",
         "Mine a set of ordered transactions to a specified address or descriptor and return the block hash.",
         {
-            {"output", RPCArg::Type::STR, RPCArg::Optional::NO, "The address or descriptor to send the newly generated bitcoin to."},
+            {"output", RPCArg::Type::STR, RPCArg::Optional::NO, "The address or descriptor to send the newly generated qogecoin to."},
             {"transactions", RPCArg::Type::ARR, RPCArg::Optional::NO, "An array of hex strings which are either txids or raw transactions.\n"
                 "Txids must reference transactions currently in the mempool.\n"
                 "All transactions must be valid and in valid order, otherwise the block will be rejected.",
@@ -437,7 +439,7 @@ static RPCHelpMan getmininginfo()
 }
 
 
-// NOTE: Unlike wallet RPC (which use BTC values), mining RPCs follow GBT (BIP 22) in using satoshi amounts
+// NOTE: Unlike wallet RPC (which use Qoge values), mining RPCs follow GBT (BIP 22) in using satoshi amounts
 static RPCHelpMan prioritisetransaction()
 {
     return RPCHelpMan{"prioritisetransaction",
@@ -509,10 +511,10 @@ static RPCHelpMan getblocktemplate()
         "\nIf the request parameters include a 'mode' key, that is used to explicitly select between the default 'template' request or a 'proposal'.\n"
         "It returns data needed to construct a block to work on.\n"
         "For full specification, see BIPs 22, 23, 9, and 145:\n"
-        "    https://github.com/bitcoin/bips/blob/master/bip-0022.mediawiki\n"
-        "    https://github.com/bitcoin/bips/blob/master/bip-0023.mediawiki\n"
-        "    https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki#getblocktemplate_changes\n"
-        "    https://github.com/bitcoin/bips/blob/master/bip-0145.mediawiki\n",
+        "    https://github.com/qogecoin/bips/blob/master/bip-0022.mediawiki\n"
+        "    https://github.com/qogecoin/bips/blob/master/bip-0023.mediawiki\n"
+        "    https://github.com/qogecoin/bips/blob/master/bip-0009.mediawiki#getblocktemplate_changes\n"
+        "    https://github.com/qogecoin/bips/blob/master/bip-0145.mediawiki\n",
         {
             {"template_request", RPCArg::Type::OBJ, RPCArg::Default{UniValue::VOBJ}, "Format of the template",
             {
@@ -949,7 +951,7 @@ static RPCHelpMan submitblock()
     // We allow 2 arguments for compliance with BIP22. Argument 2 is ignored.
     return RPCHelpMan{"submitblock",
         "\nAttempts to submit new block to network.\n"
-        "See https://en.bitcoin.it/wiki/BIP_0022 for full specification.\n",
+        "See https://en.qogecoin.it/wiki/BIP_0022 for full specification.\n",
         {
             {"hexdata", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "the hex-encoded block data to submit"},
             {"dummy", RPCArg::Type::STR, RPCArg::DefaultHint{"ignored"}, "dummy value, for compatibility with BIP22. This value is ignored."},
@@ -1052,6 +1054,201 @@ static RPCHelpMan submitheader()
     };
 }
 
+static RPCHelpMan estimatesmartfee()
+{
+    return RPCHelpMan{"estimatesmartfee",
+        "\nEstimates the approximate fee per kilobyte needed for a transaction to begin\n"
+        "confirmation within conf_target blocks if possible and return the number of blocks\n"
+        "for which the estimate is valid. Uses virtual transaction size as defined\n"
+        "in BIP 141 (witness data is discounted).\n",
+        {
+            {"conf_target", RPCArg::Type::NUM, RPCArg::Optional::NO, "Confirmation target in blocks (1 - 1008)"},
+            {"estimate_mode", RPCArg::Type::STR, RPCArg::Default{"conservative"}, "The fee estimate mode.\n"
+            "                   Whether to return a more conservative estimate which also satisfies\n"
+            "                   a longer history. A conservative estimate potentially returns a\n"
+            "                   higher feerate and is more likely to be sufficient for the desired\n"
+            "                   target, but is not as responsive to short term drops in the\n"
+            "                   prevailing fee market. Must be one of (case insensitive):\n"
+             "\"" + FeeModes("\"\n\"") + "\""},
+                },
+                RPCResult{
+                    RPCResult::Type::OBJ, "", "",
+                    {
+                        {RPCResult::Type::NUM, "feerate", /*optional=*/true, "estimate fee rate in " + CURRENCY_UNIT + "/kvB (only present if no errors were encountered)"},
+                        {RPCResult::Type::ARR, "errors", /*optional=*/true, "Errors encountered during processing (if there are any)",
+                            {
+                                {RPCResult::Type::STR, "", "error"},
+                            }},
+                        {RPCResult::Type::NUM, "blocks", "block number where estimate was found\n"
+            "The request target will be clamped between 2 and the highest target\n"
+            "fee estimation is able to return based on how long it has been running.\n"
+            "An error is returned if not enough transactions and blocks\n"
+            "have been observed to make an estimate for any number of blocks."},
+                    }},
+                RPCExamples{
+                    HelpExampleCli("estimatesmartfee", "6") +
+                    HelpExampleRpc("estimatesmartfee", "6")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    RPCTypeCheck(request.params, {UniValue::VNUM, UniValue::VSTR});
+    RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
+
+    CBlockPolicyEstimator& fee_estimator = EnsureAnyFeeEstimator(request.context);
+    const NodeContext& node = EnsureAnyNodeContext(request.context);
+    const CTxMemPool& mempool = EnsureMemPool(node);
+
+    unsigned int max_target = fee_estimator.HighestTargetTracked(FeeEstimateHorizon::LONG_HALFLIFE);
+    unsigned int conf_target = ParseConfirmTarget(request.params[0], max_target);
+    bool conservative = true;
+    if (!request.params[1].isNull()) {
+        FeeEstimateMode fee_mode;
+        if (!FeeModeFromString(request.params[1].get_str(), fee_mode)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, InvalidEstimateModeErrorMessage());
+        }
+        if (fee_mode == FeeEstimateMode::ECONOMICAL) conservative = false;
+    }
+
+    UniValue result(UniValue::VOBJ);
+    UniValue errors(UniValue::VARR);
+    FeeCalculation feeCalc;
+    CFeeRate feeRate{fee_estimator.estimateSmartFee(conf_target, &feeCalc, conservative)};
+    if (feeRate != CFeeRate(0)) {
+        CFeeRate min_mempool_feerate{mempool.GetMinFee(gArgs.GetIntArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000)};
+        CFeeRate min_relay_feerate{::minRelayTxFee};
+        feeRate = std::max({feeRate, min_mempool_feerate, min_relay_feerate});
+        result.pushKV("feerate", ValueFromAmount(feeRate.GetFeePerK()));
+    } else {
+        errors.push_back("Insufficient data or no feerate found");
+        result.pushKV("errors", errors);
+    }
+    result.pushKV("blocks", feeCalc.returnedTarget);
+    return result;
+},
+    };
+}
+
+static RPCHelpMan estimaterawfee()
+{
+    return RPCHelpMan{"estimaterawfee",
+                "\nWARNING: This interface is unstable and may disappear or change!\n"
+                "\nWARNING: This is an advanced API call that is tightly coupled to the specific\n"
+                "         implementation of fee estimation. The parameters it can be called with\n"
+                "         and the results it returns will change if the internal implementation changes.\n"
+                "\nEstimates the approximate fee per kilobyte needed for a transaction to begin\n"
+                "confirmation within conf_target blocks if possible. Uses virtual transaction size as\n"
+                "defined in BIP 141 (witness data is discounted).\n",
+                {
+                    {"conf_target", RPCArg::Type::NUM, RPCArg::Optional::NO, "Confirmation target in blocks (1 - 1008)"},
+                    {"threshold", RPCArg::Type::NUM, RPCArg::Default{0.95}, "The proportion of transactions in a given feerate range that must have been\n"
+            "               confirmed within conf_target in order to consider those feerates as high enough and proceed to check\n"
+            "               lower buckets."},
+                },
+                RPCResult{
+                    RPCResult::Type::OBJ, "", "Results are returned for any horizon which tracks blocks up to the confirmation target",
+                    {
+                        {RPCResult::Type::OBJ, "short", /*optional=*/true, "estimate for short time horizon",
+                            {
+                                {RPCResult::Type::NUM, "feerate", /*optional=*/true, "estimate fee rate in " + CURRENCY_UNIT + "/kvB"},
+                                {RPCResult::Type::NUM, "decay", "exponential decay (per block) for historical moving average of confirmation data"},
+                                {RPCResult::Type::NUM, "scale", "The resolution of confirmation targets at this time horizon"},
+                                {RPCResult::Type::OBJ, "pass", /*optional=*/true, "information about the lowest range of feerates to succeed in meeting the threshold",
+                                {
+                                        {RPCResult::Type::NUM, "startrange", "start of feerate range"},
+                                        {RPCResult::Type::NUM, "endrange", "end of feerate range"},
+                                        {RPCResult::Type::NUM, "withintarget", "number of txs over history horizon in the feerate range that were confirmed within target"},
+                                        {RPCResult::Type::NUM, "totalconfirmed", "number of txs over history horizon in the feerate range that were confirmed at any point"},
+                                        {RPCResult::Type::NUM, "inmempool", "current number of txs in mempool in the feerate range unconfirmed for at least target blocks"},
+                                        {RPCResult::Type::NUM, "leftmempool", "number of txs over history horizon in the feerate range that left mempool unconfirmed after target"},
+                                }},
+                                {RPCResult::Type::OBJ, "fail", /*optional=*/true, "information about the highest range of feerates to fail to meet the threshold",
+                                {
+                                    {RPCResult::Type::ELISION, "", ""},
+                                }},
+                                {RPCResult::Type::ARR, "errors", /*optional=*/true, "Errors encountered during processing (if there are any)",
+                                {
+                                    {RPCResult::Type::STR, "error", ""},
+                                }},
+                        }},
+                        {RPCResult::Type::OBJ, "medium", /*optional=*/true, "estimate for medium time horizon",
+                        {
+                            {RPCResult::Type::ELISION, "", ""},
+                        }},
+                        {RPCResult::Type::OBJ, "long", /*optional=*/true, "estimate for long time horizon",
+                        {
+                            {RPCResult::Type::ELISION, "", ""},
+                        }},
+                    }},
+                RPCExamples{
+                    HelpExampleCli("estimaterawfee", "6 0.9")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    RPCTypeCheck(request.params, {UniValue::VNUM, UniValue::VNUM}, true);
+    RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
+
+    CBlockPolicyEstimator& fee_estimator = EnsureAnyFeeEstimator(request.context);
+
+    unsigned int max_target = fee_estimator.HighestTargetTracked(FeeEstimateHorizon::LONG_HALFLIFE);
+    unsigned int conf_target = ParseConfirmTarget(request.params[0], max_target);
+    double threshold = 0.95;
+    if (!request.params[1].isNull()) {
+        threshold = request.params[1].get_real();
+    }
+    if (threshold < 0 || threshold > 1) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid threshold");
+    }
+
+    UniValue result(UniValue::VOBJ);
+
+    for (const FeeEstimateHorizon horizon : ALL_FEE_ESTIMATE_HORIZONS) {
+        CFeeRate feeRate;
+        EstimationResult buckets;
+
+        // Only output results for horizons which track the target
+        if (conf_target > fee_estimator.HighestTargetTracked(horizon)) continue;
+
+        feeRate = fee_estimator.estimateRawFee(conf_target, threshold, horizon, &buckets);
+        UniValue horizon_result(UniValue::VOBJ);
+        UniValue errors(UniValue::VARR);
+        UniValue passbucket(UniValue::VOBJ);
+        passbucket.pushKV("startrange", round(buckets.pass.start));
+        passbucket.pushKV("endrange", round(buckets.pass.end));
+        passbucket.pushKV("withintarget", round(buckets.pass.withinTarget * 100.0) / 100.0);
+        passbucket.pushKV("totalconfirmed", round(buckets.pass.totalConfirmed * 100.0) / 100.0);
+        passbucket.pushKV("inmempool", round(buckets.pass.inMempool * 100.0) / 100.0);
+        passbucket.pushKV("leftmempool", round(buckets.pass.leftMempool * 100.0) / 100.0);
+        UniValue failbucket(UniValue::VOBJ);
+        failbucket.pushKV("startrange", round(buckets.fail.start));
+        failbucket.pushKV("endrange", round(buckets.fail.end));
+        failbucket.pushKV("withintarget", round(buckets.fail.withinTarget * 100.0) / 100.0);
+        failbucket.pushKV("totalconfirmed", round(buckets.fail.totalConfirmed * 100.0) / 100.0);
+        failbucket.pushKV("inmempool", round(buckets.fail.inMempool * 100.0) / 100.0);
+        failbucket.pushKV("leftmempool", round(buckets.fail.leftMempool * 100.0) / 100.0);
+
+        // CFeeRate(0) is used to indicate error as a return value from estimateRawFee
+        if (feeRate != CFeeRate(0)) {
+            horizon_result.pushKV("feerate", ValueFromAmount(feeRate.GetFeePerK()));
+            horizon_result.pushKV("decay", buckets.decay);
+            horizon_result.pushKV("scale", (int)buckets.scale);
+            horizon_result.pushKV("pass", passbucket);
+            // buckets.fail.start == -1 indicates that all buckets passed, there is no fail bucket to output
+            if (buckets.fail.start != -1) horizon_result.pushKV("fail", failbucket);
+        } else {
+            // Output only information that is still meaningful in the event of error
+            horizon_result.pushKV("decay", buckets.decay);
+            horizon_result.pushKV("scale", (int)buckets.scale);
+            horizon_result.pushKV("fail", failbucket);
+            errors.push_back("Insufficient data or no feerate found which meets threshold");
+            horizon_result.pushKV("errors",errors);
+        }
+        result.pushKV(StringForFeeEstimateHorizon(horizon), horizon_result);
+    }
+    return result;
+},
+    };
+}
+
 void RegisterMiningRPCCommands(CRPCTable& t)
 {
     static const CRPCCommand commands[]{
@@ -1065,6 +1262,10 @@ void RegisterMiningRPCCommands(CRPCTable& t)
         {"hidden", &generatetoaddress},
         {"hidden", &generatetodescriptor},
         {"hidden", &generateblock},
+
+        {"util", &estimatesmartfee},
+
+        {"hidden", &estimaterawfee},
         {"hidden", &generate},
     };
     for (const auto& c : commands) {

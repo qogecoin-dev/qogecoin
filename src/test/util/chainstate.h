@@ -1,9 +1,9 @@
-// Copyright (c) 2021 The Bitcoin Core developers
+// Copyright (c) 2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 //
-#ifndef BITCOIN_TEST_UTIL_CHAINSTATE_H
-#define BITCOIN_TEST_UTIL_CHAINSTATE_H
+#ifndef QOGECOIN_TEST_UTIL_CHAINSTATE_H
+#define QOGECOIN_TEST_UTIL_CHAINSTATE_H
 
 #include <clientversion.h>
 #include <fs.h>
@@ -30,7 +30,7 @@ CreateAndActivateUTXOSnapshot(node::NodeContext& node, const fs::path root, F ma
     //
     int height;
     WITH_LOCK(::cs_main, height = node.chainman->ActiveHeight());
-    fs::path snapshot_path = root / fs::u8path(tfm::format("test_snapshot.%d.dat", height));
+    fs::path snapshot_path = root / tfm::format("test_snapshot.%d.dat", height);
     FILE* outfile{fsbridge::fopen(snapshot_path, "wb")};
     CAutoFile auto_outfile{outfile, SER_DISK, CLIENT_VERSION};
 
@@ -52,4 +52,4 @@ CreateAndActivateUTXOSnapshot(node::NodeContext& node, const fs::path root, F ma
 }
 
 
-#endif // BITCOIN_TEST_UTIL_CHAINSTATE_H
+#endif // QOGECOIN_TEST_UTIL_CHAINSTATE_H

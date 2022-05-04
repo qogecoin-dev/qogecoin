@@ -1,9 +1,9 @@
-// Copyright (c) 2015-2019 The Bitcoin Core developers
+// Copyright (c) 2015-2019 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_CONSENSUS_MERKLE_H
-#define BITCOIN_CONSENSUS_MERKLE_H
+#ifndef QOGECOIN_CONSENSUS_MERKLE_H
+#define QOGECOIN_CONSENSUS_MERKLE_H
 
 #include <vector>
 
@@ -24,4 +24,4 @@ uint256 BlockMerkleRoot(const CBlock& block, bool* mutated = nullptr);
  */
 uint256 BlockWitnessMerkleRoot(const CBlock& block, bool* mutated = nullptr);
 
-#endif // BITCOIN_CONSENSUS_MERKLE_H
+#endif // QOGECOIN_CONSENSUS_MERKLE_H

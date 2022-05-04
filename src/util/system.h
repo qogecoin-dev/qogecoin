@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2021 The Bitcoin Core developers
+// Copyright (c) 2009-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,11 +7,11 @@
  * Server/client environment: argument handling, config file parsing,
  * thread wrappers, startup time
  */
-#ifndef BITCOIN_UTIL_SYSTEM_H
-#define BITCOIN_UTIL_SYSTEM_H
+#ifndef QOGECOIN_UTIL_SYSTEM_H
+#define QOGECOIN_UTIL_SYSTEM_H
 
 #if defined(HAVE_CONFIG_H)
-#include <config/bitcoin-config.h>
+#include <config/qogecoin-config.h>
 #endif
 
 #include <attributes.h>
@@ -39,8 +39,8 @@ class UniValue;
 // Application startup time (used for uptime calculation)
 int64_t GetStartupTime();
 
-extern const char * const BITCOIN_CONF_FILENAME;
-extern const char * const BITCOIN_SETTINGS_FILENAME;
+extern const char * const QOGECOIN_CONF_FILENAME;
+extern const char * const QOGECOIN_SETTINGS_FILENAME;
 
 void SetupEnvironment();
 bool SetupNetworking();
@@ -76,8 +76,8 @@ void AllocateFileRange(FILE *file, unsigned int offset, unsigned int length);
  */
 [[nodiscard]] bool RenameOver(fs::path src, fs::path dest);
 
-bool LockDirectory(const fs::path& directory, const fs::path& lockfile_name, bool probe_only=false);
-void UnlockDirectory(const fs::path& directory, const fs::path& lockfile_name);
+bool LockDirectory(const fs::path& directory, const std::string lockfile_name, bool probe_only=false);
+void UnlockDirectory(const fs::path& directory, const std::string& lockfile_name);
 bool DirIsWritable(const fs::path& directory);
 bool CheckDiskSpace(const fs::path& dir, uint64_t additional_bytes = 0);
 
@@ -562,4 +562,4 @@ private:
 
 } // namespace util
 
-#endif // BITCOIN_UTIL_SYSTEM_H
+#endif // QOGECOIN_UTIL_SYSTEM_H

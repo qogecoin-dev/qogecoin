@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021 The Bitcoin Core developers
+// Copyright (c) 2017-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -75,7 +75,7 @@ bool BaseIndex::Init()
         if (!m_best_block_index) {
             // index is not built yet
             // make sure we have all block data back to the genesis
-            prune_violation = m_chainstate->m_blockman.GetFirstStoredBlock(*active_chain.Tip()) != active_chain.Genesis();
+            prune_violation = node::GetFirstStoredBlock(active_chain.Tip()) != active_chain.Genesis();
         }
         // in case the index has a best block set and is not fully synced
         // check if we have the required blocks to continue building the index

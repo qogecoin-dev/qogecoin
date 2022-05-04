@@ -68,7 +68,7 @@
     <Link>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <OptimizeReferences>false</OptimizeReferences>
-      <AdditionalOptions>/LTCG:OFF</AdditionalOptions>
+      <AdditionalOptions>/QogeG:OFF</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
 

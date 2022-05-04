@@ -1,4 +1,4 @@
-// Copyright (c) 2009-2021 The Bitcoin Core developers
+// Copyright (c) 2009-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,8 +8,8 @@
 #include <type_traits>
 #include <vector>
 
-#ifndef BITCOIN_NET_PERMISSIONS_H
-#define BITCOIN_NET_PERMISSIONS_H
+#ifndef QOGECOIN_NET_PERMISSIONS_H
+#define QOGECOIN_NET_PERMISSIONS_H
 
 struct bilingual_str;
 
@@ -86,4 +86,4 @@ public:
     CSubNet m_subnet;
 };
 
-#endif // BITCOIN_NET_PERMISSIONS_H
+#endif // QOGECOIN_NET_PERMISSIONS_H

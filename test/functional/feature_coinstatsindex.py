@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2020-2021 The Bitcoin Core developers
+# Copyright (c) 2020-2021 The Bitcoin and Qogecoin Core Authors
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test coinstatsindex across nodes.
@@ -25,7 +25,7 @@ from test_framework.script import (
     OP_FALSE,
     OP_RETURN,
 )
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import QogecoinTestFramework
 from test_framework.util import (
     assert_equal,
     assert_raises_rpc_error,
@@ -36,7 +36,7 @@ from test_framework.wallet import (
 )
 
 
-class CoinStatsIndexTest(BitcoinTestFramework):
+class CoinStatsIndexTest(QogecoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 2
@@ -151,7 +151,7 @@ class CoinStatsIndexTest(BitcoinTestFramework):
             amount=21 * COIN,
         )
 
-        # Find the right position of the 21 BTC output
+        # Find the right position of the 21 Qoge output
         tx1_out_21 = self.wallet.get_utxo(txid=tx1_txid, vout=tx1_vout)
 
         # Generate and send another tx with an OP_RETURN output (which is unspendable)
@@ -231,13 +231,11 @@ class CoinStatsIndexTest(BitcoinTestFramework):
 
         self.log.info("Test that -reindex-chainstate is disallowed with coinstatsindex")
 
-        self.stop_node(1)
         self.nodes[1].assert_start_raises_init_error(
             expected_msg='Error: -reindex-chainstate option is not compatible with -coinstatsindex. '
             'Please temporarily disable coinstatsindex while using -reindex-chainstate, or replace -reindex-chainstate with -reindex to fully rebuild all indexes.',
             extra_args=['-coinstatsindex', '-reindex-chainstate'],
         )
-        self.restart_node(1, extra_args=["-coinstatsindex"])
 
     def _test_use_index_option(self):
         self.log.info("Test use_index option for nodes running the index")

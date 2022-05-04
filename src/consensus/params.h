@@ -1,10 +1,10 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2021 The Bitcoin Core developers
+// Copyright (c) 2009-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_CONSENSUS_PARAMS_H
-#define BITCOIN_CONSENSUS_PARAMS_H
+#ifndef QOGECOIN_CONSENSUS_PARAMS_H
+#define QOGECOIN_CONSENSUS_PARAMS_H
 
 #include <uint256.h>
 
@@ -116,7 +116,7 @@ struct Params {
     uint256 defaultAssumeValid;
 
     /**
-     * If true, witness commitments contain a payload equal to a Bitcoin Script solution
+     * If true, witness commitments contain a payload equal to a Qogecoin Script solution
      * to the signet challenge. See BIP325.
      */
     bool signet_blocks{false};
@@ -142,4 +142,4 @@ struct Params {
 
 } // namespace Consensus
 
-#endif // BITCOIN_CONSENSUS_PARAMS_H
+#endif // QOGECOIN_CONSENSUS_PARAMS_H

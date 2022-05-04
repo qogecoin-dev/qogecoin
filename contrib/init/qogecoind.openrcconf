@@ -1,0 +1,33 @@
+# /etc/conf.d/qogecoind: config file for /etc/init.d/qogecoind
+
+# Config file location
+#QOGECOIND_CONFIGFILE="/etc/qogecoin/qogecoin.conf"
+
+# What directory to write pidfile to?  (created and owned by $QOGECOIND_USER)
+#QOGECOIND_PIDDIR="/var/run/qogecoind"
+
+# What filename to give the pidfile
+#QOGECOIND_PIDFILE="${QOGECOIND_PIDDIR}/qogecoind.pid"
+
+# Where to write qogecoind data (be mindful that the blockchain is large)
+#QOGECOIND_DATADIR="/var/lib/qogecoind"
+
+# User and group to own qogecoind process
+#QOGECOIND_USER="qogecoin"
+#QOGECOIND_GROUP="qogecoin"
+
+# Path to qogecoind executable
+#QOGECOIND_BIN="/usr/bin/qogecoind"
+
+# Nice value to run qogecoind under
+#QOGECOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#QOGECOIND_OPTS=""
+
+# The timeout in seconds OpenRC will wait for qogecoind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+QOGECOIND_SIGTERM_TIMEOUT=600

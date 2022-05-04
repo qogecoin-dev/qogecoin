@@ -1,10 +1,10 @@
 // Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2021 The Bitcoin Core developers
+// Copyright (c) 2009-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_NODE_COINSTATS_H
-#define BITCOIN_NODE_COINSTATS_H
+#ifndef QOGECOIN_NODE_COINSTATS_H
+#define QOGECOIN_NODE_COINSTATS_H
 
 #include <chain.h>
 #include <coins.h>
@@ -81,4 +81,4 @@ uint64_t GetBogoSize(const CScript& script_pub_key);
 CDataStream TxOutSer(const COutPoint& outpoint, const Coin& coin);
 } // namespace node
 
-#endif // BITCOIN_NODE_COINSTATS_H
+#endif // QOGECOIN_NODE_COINSTATS_H

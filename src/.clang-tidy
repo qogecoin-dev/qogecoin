@@ -1,11 +1,2 @@
-Checks: '
--*,
-bugprone-argument-comment,
-modernize-use-nullptr,
-readability-redundant-declaration,
-'
-WarningsAsErrors: '
-bugprone-argument-comment,
-modernize-use-nullptr,
-readability-redundant-declaration,
-'
+Checks:          '-*,bugprone-argument-comment,modernize-use-nullptr'
+WarningsAsErrors: 'bugprone-argument-comment,modernize-use-nullptr'

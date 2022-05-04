@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2021 The Bitcoin Core developers
+// Copyright (c) 2009-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -26,7 +26,7 @@ namespace {
 //!
 //! BerkeleyDB generates unique fileids by default
 //! (https://docs.oracle.com/cd/E17275_01/html/programmer_reference/program_copy.html),
-//! so bitcoin should never create different databases with the same fileid, but
+//! so qogecoin should never create different databases with the same fileid, but
 //! this error can be triggered if users manually copy database files.
 void CheckUniqueFileid(const BerkeleyEnvironment& env, const std::string& filename, Db& db, WalletDatabaseFileId& fileid)
 {
@@ -261,7 +261,7 @@ BerkeleyBatch::SafeDbt::operator Dbt*()
 bool BerkeleyDatabase::Verify(bilingual_str& errorStr)
 {
     fs::path walletDir = env->Directory();
-    fs::path file_path = walletDir / m_filename;
+    fs::path file_path = walletDir / strFile;
 
     LogPrintf("Using BerkeleyDB version %s\n", BerkeleyDatabaseVersion());
     LogPrintf("Using wallet %s\n", fs::PathToString(file_path));
@@ -275,10 +275,9 @@ bool BerkeleyDatabase::Verify(bilingual_str& errorStr)
         assert(m_refcount == 0);
 
         Db db(env->dbenv.get(), 0);
-        const std::string strFile = fs::PathToString(m_filename);
         int result = db.verify(strFile.c_str(), nullptr, nullptr, 0);
         if (result != 0) {
-            errorStr = strprintf(_("%s corrupt. Try using the wallet tool bitcoin-wallet to salvage or restoring a backup."), fs::quoted(fs::PathToString(file_path)));
+            errorStr = strprintf(_("%s corrupt. Try using the wallet tool qogecoin-wallet to salvage or restoring a backup."), fs::quoted(fs::PathToString(file_path)));
             return false;
         }
     }
@@ -298,11 +297,11 @@ BerkeleyDatabase::~BerkeleyDatabase()
 {
     if (env) {
         LOCK(cs_db);
-        env->CloseDb(m_filename);
+        env->CloseDb(strFile);
         assert(!m_db);
-        size_t erased = env->m_databases.erase(m_filename);
+        size_t erased = env->m_databases.erase(strFile);
         assert(erased == 1);
-        env->m_fileids.erase(fs::PathToString(m_filename));
+        env->m_fileids.erase(strFile);
     }
 }
 
@@ -314,7 +313,7 @@ BerkeleyBatch::BerkeleyBatch(BerkeleyDatabase& database, const bool read_only, b
     fFlushOnClose = fFlushOnCloseIn;
     env = database.env.get();
     pdb = database.m_db.get();
-    strFile = fs::PathToString(database.m_filename);
+    strFile = database.strFile;
     if (!Exists(std::string("version"))) {
         bool fTmp = fReadOnly;
         fReadOnly = false;
@@ -336,7 +335,6 @@ void BerkeleyDatabase::Open()
         if (m_db == nullptr) {
             int ret;
             std::unique_ptr<Db> pdb_temp = std::make_unique<Db>(env->dbenv.get(), 0);
-            const std::string strFile = fs::PathToString(m_filename);
 
             bool fMockDb = env->IsMock();
             if (fMockDb) {
@@ -409,11 +407,11 @@ void BerkeleyBatch::Close()
         Flush();
 }
 
-void BerkeleyEnvironment::CloseDb(const fs::path& filename)
+void BerkeleyEnvironment::CloseDb(const std::string& strFile)
 {
     {
         LOCK(cs_db);
-        auto it = m_databases.find(filename);
+        auto it = m_databases.find(strFile);
         assert(it != m_databases.end());
         BerkeleyDatabase& database = it->second.get();
         if (database.m_db) {
@@ -436,12 +434,12 @@ void BerkeleyEnvironment::ReloadDbEnv()
         return true;
     });
 
-    std::vector<fs::path> filenames;
+    std::vector<std::string> filenames;
     for (auto it : m_databases) {
         filenames.push_back(it.first);
     }
     // Close the individual Db's
-    for (const fs::path& filename : filenames) {
+    for (const std::string& filename : filenames) {
         CloseDb(filename);
     }
     // Reset the environment
@@ -456,10 +454,9 @@ bool BerkeleyDatabase::Rewrite(const char* pszSkip)
     while (true) {
         {
             LOCK(cs_db);
-            const std::string strFile = fs::PathToString(m_filename);
             if (m_refcount <= 0) {
                 // Flush log data to the dat file
-                env->CloseDb(m_filename);
+                env->CloseDb(strFile);
                 env->CheckpointLSN(strFile);
                 m_refcount = -1;
 
@@ -511,7 +508,7 @@ bool BerkeleyDatabase::Rewrite(const char* pszSkip)
                     }
                     if (fSuccess) {
                         db.Close();
-                        env->CloseDb(m_filename);
+                        env->CloseDb(strFile);
                         if (pdbCopy->close(0))
                             fSuccess = false;
                     } else {
@@ -547,14 +544,13 @@ void BerkeleyEnvironment::Flush(bool fShutdown)
         LOCK(cs_db);
         bool no_dbs_accessed = true;
         for (auto& db_it : m_databases) {
-            const fs::path& filename = db_it.first;
+            std::string strFile = db_it.first;
             int nRefCount = db_it.second.get().m_refcount;
             if (nRefCount < 0) continue;
-            const std::string strFile = fs::PathToString(filename);
             LogPrint(BCLog::WALLETDB, "BerkeleyEnvironment::Flush: Flushing %s (refcount = %d)...\n", strFile, nRefCount);
             if (nRefCount == 0) {
                 // Move log data to the dat file
-                CloseDb(filename);
+                CloseDb(strFile);
                 LogPrint(BCLog::WALLETDB, "BerkeleyEnvironment::Flush: %s checkpoint\n", strFile);
                 dbenv->txn_checkpoint(0, 0, 0);
                 LogPrint(BCLog::WALLETDB, "BerkeleyEnvironment::Flush: %s detach\n", strFile);
@@ -594,12 +590,11 @@ bool BerkeleyDatabase::PeriodicFlush()
     // Don't flush if there haven't been any batch writes for this database.
     if (m_refcount < 0) return false;
 
-    const std::string strFile = fs::PathToString(m_filename);
     LogPrint(BCLog::WALLETDB, "Flushing %s\n", strFile);
     int64_t nStart = GetTimeMillis();
 
     // Flush wallet file so it's self contained
-    env->CloseDb(m_filename);
+    env->CloseDb(strFile);
     env->CheckpointLSN(strFile);
     m_refcount = -1;
 
@@ -610,7 +605,6 @@ bool BerkeleyDatabase::PeriodicFlush()
 
 bool BerkeleyDatabase::Backup(const std::string& strDest) const
 {
-    const std::string strFile = fs::PathToString(m_filename);
     while (true)
     {
         {
@@ -618,14 +612,14 @@ bool BerkeleyDatabase::Backup(const std::string& strDest) const
             if (m_refcount <= 0)
             {
                 // Flush log data to the dat file
-                env->CloseDb(m_filename);
+                env->CloseDb(strFile);
                 env->CheckpointLSN(strFile);
 
                 // Copy wallet file
-                fs::path pathSrc = env->Directory() / m_filename;
+                fs::path pathSrc = env->Directory() / strFile;
                 fs::path pathDest(fs::PathFromString(strDest));
                 if (fs::is_directory(pathDest))
-                    pathDest /= m_filename;
+                    pathDest /= fs::PathFromString(strFile);
 
                 try {
                     if (fs::exists(pathDest) && fs::equivalent(pathSrc, pathDest)) {
@@ -837,7 +831,7 @@ std::unique_ptr<BerkeleyDatabase> MakeBerkeleyDatabase(const fs::path& path, con
     std::unique_ptr<BerkeleyDatabase> db;
     {
         LOCK(cs_db); // Lock env.m_databases until insert in BerkeleyDatabase constructor
-        fs::path data_filename = data_file.filename();
+        std::string data_filename = fs::PathToString(data_file.filename());
         std::shared_ptr<BerkeleyEnvironment> env = GetBerkeleyEnv(data_file.parent_path(), options.use_shared_memory);
         if (env->m_databases.count(data_filename)) {
             error = Untranslated(strprintf("Refusing to load database. Data file '%s' is already loaded.", fs::PathToString(env->Directory() / data_filename)));

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2020-2022 The Bitcoin Core developers
+# Copyright (c) 2020-2022 The Bitcoin and Qogecoin Core Authors
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #
 # Check for circular dependencies
 
+import glob
 import os
 import re
 import subprocess
@@ -31,14 +32,17 @@ CODE_DIR = "src"
 def main():
     circular_dependencies = []
     exit_code = 0
+    os.chdir(
+        CODE_DIR
+    )  # We change dir before globbing since glob.glob's root_dir option is only available in Python 3.10
 
-    os.chdir(CODE_DIR)
-    files = subprocess.check_output(
-        ['git', 'ls-files', '--', '*.h', '*.cpp'],
-        universal_newlines=True,
-    ).splitlines()
+    # Using glob.glob since subprocess.run's globbing won't work without shell=True
+    files = []
+    for path in ["*", "*/*", "*/*/*"]:
+        for extension in ["h", "cpp"]:
+            files.extend(glob.glob(f"{path}.{extension}"))
 
-    command = [sys.executable, "../contrib/devtools/circular-dependencies.py", *files]
+    command = ["python3", "../contrib/devtools/circular-dependencies.py", *files]
     dependencies_output = subprocess.run(
         command,
         stdout=subprocess.PIPE,

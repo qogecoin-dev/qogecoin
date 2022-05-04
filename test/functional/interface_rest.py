@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2014-2021 The Bitcoin Core developers
+# Copyright (c) 2014-2021 The Bitcoin and Qogecoin Core Authors
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the REST API."""
@@ -18,7 +18,7 @@ from test_framework.messages import (
     BLOCK_HEADER_SIZE,
     COIN,
 )
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import QogecoinTestFramework
 from test_framework.util import (
     assert_equal,
     assert_greater_than,
@@ -49,7 +49,7 @@ def filter_output_indices_by_value(vouts, value):
         if vout['value'] == value:
             yield vout['n']
 
-class RESTTest (BitcoinTestFramework):
+class RESTTest (QogecoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.extra_args = [["-rest", "-blockfilterindex=1"], []]
@@ -219,7 +219,7 @@ class RESTTest (BitcoinTestFramework):
 
         self.generate(self.nodes[0], 1)  # generate block to not affect upcoming tests
 
-        self.log.info("Test the /block, /blockhashbyheight, /headers, and /blockfilterheaders URIs")
+        self.log.info("Test the /block, /blockhashbyheight and /headers URIs")
         bb_hash = self.nodes[0].getbestblockhash()
 
         # Check result if block does not exists
@@ -299,12 +299,6 @@ class RESTTest (BitcoinTestFramework):
         rpc_blockfilter = self.nodes[0].getblockfilter(bb_hash)
         assert_equal(first_filter_header, rpc_blockfilter['header'])
         assert_equal(json_obj['filter'], rpc_blockfilter['filter'])
-
-        # Test blockfilterheaders with an invalid hash and filtertype
-        resp = self.test_rest_request(f"/blockfilterheaders/{INVALID_PARAM}/{bb_hash}", ret_type=RetType.OBJ, status=400)
-        assert_equal(resp.read().decode('utf-8').rstrip(), f"Unknown filtertype {INVALID_PARAM}")
-        resp = self.test_rest_request(f"/blockfilterheaders/basic/{INVALID_PARAM}", ret_type=RetType.OBJ, status=400)
-        assert_equal(resp.read().decode('utf-8').rstrip(), f"Invalid hash: {INVALID_PARAM}")
 
         # Test number parsing
         for num in ['5a', '-5', '0', '2001', '99999999999999999999999999999999999']:

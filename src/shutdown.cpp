@@ -1,18 +1,16 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2021 The Bitcoin Core developers
+// Copyright (c) 2009-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <shutdown.h>
 
-#if defined(HAVE_CONFIG_H)
-#include <config/bitcoin-config.h>
-#endif
-
 #include <logging.h>
 #include <node/ui_interface.h>
 #include <util/tokenpipe.h>
 #include <warnings.h>
+
+#include <config/qogecoin-config.h>
 
 #include <assert.h>
 #include <atomic>

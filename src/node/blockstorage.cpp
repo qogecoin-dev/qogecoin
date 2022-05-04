@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2021 The Bitcoin Core developers
+// Copyright (c) 2011-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -390,10 +390,10 @@ bool BlockManager::IsBlockPruned(const CBlockIndex* pblockindex)
     return (m_have_pruned && !(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0);
 }
 
-const CBlockIndex* BlockManager::GetFirstStoredBlock(const CBlockIndex& start_block)
-{
+const CBlockIndex* GetFirstStoredBlock(const CBlockIndex* start_block) {
     AssertLockHeld(::cs_main);
-    const CBlockIndex* last_block = &start_block;
+    assert(start_block);
+    const CBlockIndex* last_block = start_block;
     while (last_block->pprev && (last_block->pprev->nStatus & BLOCK_HAVE_DATA)) {
         last_block = last_block->pprev;
     }
@@ -727,7 +727,7 @@ bool ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos, const Consensus::P
     }
 
     // Check the header
-    if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)) {
+    if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
         return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
     }
 

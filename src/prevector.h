@@ -1,9 +1,9 @@
-// Copyright (c) 2015-2020 The Bitcoin Core developers
+// Copyright (c) 2015-2020 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_PREVECTOR_H
-#define BITCOIN_PREVECTOR_H
+#ifndef QOGECOIN_PREVECTOR_H
+#define QOGECOIN_PREVECTOR_H
 
 #include <assert.h>
 #include <stdlib.h>
@@ -458,8 +458,7 @@ public:
         return *item_ptr(size() - 1);
     }
 
-    void swap(prevector<N, T, Size, Diff>& other) noexcept
-    {
+    void swap(prevector<N, T, Size, Diff>& other) {
         std::swap(_union, other._union);
         std::swap(_size, other._size);
     }
@@ -535,4 +534,4 @@ public:
     }
 };
 
-#endif // BITCOIN_PREVECTOR_H
+#endif // QOGECOIN_PREVECTOR_H

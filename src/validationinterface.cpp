@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2020 The Bitcoin Core developers
+// Copyright (c) 2009-2020 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -40,7 +40,7 @@ public:
     // our own queue here :(
     SingleThreadedSchedulerClient m_schedulerClient;
 
-    explicit MainSignalsInstance(CScheduler& scheduler LIFETIMEBOUND) : m_schedulerClient(scheduler) {}
+    explicit MainSignalsInstance(CScheduler *pscheduler) : m_schedulerClient(pscheduler) {}
 
     void Register(std::shared_ptr<CValidationInterface> callbacks)
     {
@@ -92,7 +92,7 @@ static CMainSignals g_signals;
 void CMainSignals::RegisterBackgroundSignalScheduler(CScheduler& scheduler)
 {
     assert(!m_internals);
-    m_internals = std::make_unique<MainSignalsInstance>(scheduler);
+    m_internals.reset(new MainSignalsInstance(&scheduler));
 }
 
 void CMainSignals::UnregisterBackgroundSignalScheduler()

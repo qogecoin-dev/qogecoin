@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2018-2022 The Bitcoin Core developers
+# Copyright (c) 2018-2022 The Bitcoin and Qogecoin Core Authors
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #
@@ -36,7 +36,7 @@ RUN_LINT_FILE = 'test/lint/run-lint-format-strings.py'
 
 def check_doctest():
     command = [
-        sys.executable,
+        'python3',
         '-m',
         'doctest',
         RUN_LINT_FILE,

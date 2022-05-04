@@ -1,22 +1,17 @@
-// Copyright (c) 2015-2021 The Bitcoin Core developers
+// Copyright (c) 2015-2021 The Bitcoin and Qogecoin Core Authors
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_SCHEDULER_H
-#define BITCOIN_SCHEDULER_H
+#ifndef QOGECOIN_SCHEDULER_H
+#define QOGECOIN_SCHEDULER_H
 
-#include <attributes.h>
-#include <sync.h>
-#include <threadsafety.h>
-
-#include <chrono>
 #include <condition_variable>
-#include <cstddef>
 #include <functional>
 #include <list>
 #include <map>
 #include <thread>
-#include <utility>
+
+#include <sync.h>
 
 /**
  * Simple class for background tasks that should be run
@@ -122,7 +117,7 @@ private:
 class SingleThreadedSchedulerClient
 {
 private:
-    CScheduler& m_scheduler;
+    CScheduler* m_pscheduler;
 
     Mutex m_callbacks_mutex;
     std::list<std::function<void()>> m_callbacks_pending GUARDED_BY(m_callbacks_mutex);
@@ -132,7 +127,7 @@ private:
     void ProcessQueue();
 
 public:
-    explicit SingleThreadedSchedulerClient(CScheduler& scheduler LIFETIMEBOUND) : m_scheduler{scheduler} {}
+    explicit SingleThreadedSchedulerClient(CScheduler* pschedulerIn) : m_pscheduler(pschedulerIn) {}
 
     /**
      * Add a callback to be executed. Callbacks are executed serially
@@ -151,4 +146,4 @@ public:
     size_t CallbacksPending();
 };
 
-#endif // BITCOIN_SCHEDULER_H
+#endif // QOGECOIN_SCHEDULER_H
