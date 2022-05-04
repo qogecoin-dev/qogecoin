@@ -1,10 +1,19 @@
 Qogecoin Core integration/staging tree
 =====================================
 
-https://qogecoincore.org
+<h1 align="center">
+Qogecoin Core [QOGE]  
+<br/><br/>
+<img src="https://i.imgur.com/tPkmb9m.png" alt="Qogecoin" width="300"/>
+</h1>
 
-For an immediately usable, binary version of the Qogecoin Core software, see
-https://qogecoincore.org/en/download/.
+
+https://qogecoin.org
+
+
+Discord------> https://discord.gg/T8uYSDmtde
+
+Blockexplorer----> http://www.qogescan.com
 
 Further information about Qogecoin Core is available in the [doc folder](/doc).
 
