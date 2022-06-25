@@ -7,13 +7,13 @@ Qogecoin Core [QOGE]
 <img src="https://i.imgur.com/tPkmb9m.png" alt="Qogecoin" width="300"/>
 </h1>
 
-
 https://qogecoin.org
 
+Binary Releases (under Assets): https://github.com/qogecoin/qogecoin/releases
 
-Discord------> https://discord.gg/T8uYSDmtde
+Discord: https://discord.gg/T8uYSDmtde
 
-Blockexplorer----> http://www.qogescan.com
+Blockexplorer: http://www.qogescan.com
 
 Further information about Qogecoin Core is available in the [doc folder](/doc).
 
