@@ -1,4 +1,4 @@
-Qogecoin Core integration/staging tree
+Qogecoin Core 
 =====================================
 
 <h1 align="center">
